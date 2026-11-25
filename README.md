@@ -1,4 +1,4 @@
-# Northstar Operations
+# Progressive adaptive dashboard
 
 **README prose word count:** 469 (headings and list text included; code blocks excluded).
 
