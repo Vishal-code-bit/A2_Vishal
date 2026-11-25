@@ -1,382 +1,1302 @@
+
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Interactive prototype demonstrating progressive mixed-initiative dashboard adaptation." />
-  <title>Northstar Operations | Adaptive Dashboard Prototype</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive prototype demonstrating progressive mixed-initiative dashboard adaptation.">
+  <title>Progressive Adaptive Dashboard</title>
+
   <style>
     :root {
       --ink: #182433;
       --muted: #69788b;
       --line: #e4eaf0;
-      --surface: #ffffff;
       --canvas: #f4f7fa;
       --navy: #12253a;
       --blue: #2563eb;
       --blue-soft: #eaf1ff;
       --teal: #0f766e;
-      --teal-soft: #e8f7f4;
       --amber: #a45b08;
       --amber-soft: #fff6e7;
-      --red: #b42318;
-      --shadow: 0 8px 28px rgba(24, 36, 51, .06);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --shadow: 0 8px 28px rgba(24,36,51,.06);
+      font-family: Arial, sans-serif;
     }
+
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--canvas); color: var(--ink); }
+
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+    }
+
     button { font: inherit; cursor: pointer; }
+
     .topbar {
-      height: 68px; background: var(--navy); color: #fff; display:flex; align-items:center;
-      justify-content:space-between; padding: 0 30px; gap: 20px;
+      height: 68px;
+      background: var(--navy);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      gap: 20px;
     }
-    .brand { display:flex; align-items:center; gap:12px; font-weight:700; letter-spacing:.1px; }
-    .brand-mark { width:32px; height:32px; display:grid; place-items:center; border-radius:10px; background:#25496c; color:#d9e8ff; font-weight:800; }
-    .top-meta { color:#c8d5e3; font-size:12px; display:flex; align-items:center; gap:12px; }
-    .pill { border:1px solid rgba(255,255,255,.23); padding:6px 10px; border-radius:30px; }
-    .layout { max-width: 1440px; margin:0 auto; display:grid; grid-template-columns:220px minmax(0,1fr); min-height:calc(100vh - 68px); }
-    aside { padding:26px 16px; border-right:1px solid var(--line); background:#fbfcfd; }
-    .side-label { padding:0 12px; color:#8a97a6; font-size:10px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; margin:10px 0 12px; }
-    .navitem { display:flex; gap:11px; align-items:center; padding:11px 12px; border-radius:9px; color:#526276; font-size:13px; margin:3px 0; }
-    .navitem.active { color:#174ea6; background:var(--blue-soft); font-weight:700; }
-    .navicon { width:20px; text-align:center; font-size:15px; }
-    .side-note { margin:28px 7px 0; border:1px solid var(--line); background:#fff; border-radius:12px; padding:13px; font-size:11px; color:var(--muted); line-height:1.5; }
-    main { padding:30px clamp(18px, 3vw, 42px) 42px; min-width:0; }
-    .heading-row { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:22px; }
-    h1 { margin:0 0 6px; font-size:25px; letter-spacing:-.55px; }
-    .subtitle { color:var(--muted); font-size:13px; }
-    .date { color:#718096; font-size:12px; padding-top:7px; white-space:nowrap; }
-    .toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin:18px 0 18px; }
-    .btn { border:1px solid #d6dee8; background:#fff; color:#27384a; border-radius:8px; padding:9px 12px; font-size:12px; font-weight:650; transition:.15s ease; }
-    .btn:hover { background:#f8fafc; border-color:#9eafc2; }
-    .btn.primary { border-color:var(--blue); background:var(--blue); color:#fff; }
-    .btn.primary:hover { background:#1d4ed8; }
-    .btn.subtle { border-color:transparent; background:transparent; color:#53657a; }
-    .btn.small { padding:7px 10px; font-size:11px; }
-    .statebar { background:#fff; border:1px solid var(--line); border-radius:12px; padding:13px 16px; display:flex; align-items:center; justify-content:space-between; gap:18px; box-shadow:var(--shadow); }
-    .state-left { display:flex; align-items:center; gap:11px; min-width:0; }
-    .state-dot { width:9px; height:9px; border-radius:50%; background:#d08a20; box-shadow:0 0 0 4px #fff3dc; flex:none; }
-    .state-title { font-weight:750; font-size:12px; }
-    .state-caption { color:var(--muted); font-size:11px; margin-top:3px; }
-    .state-right { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
-    .state-tag { padding:6px 9px; border-radius:30px; background:#f0f4f8; color:#526276; font-size:10px; font-weight:750; white-space:nowrap; }
-    .toggle-wrap { display:flex; align-items:center; gap:8px; color:#566578; font-size:11px; white-space:nowrap; }
-    .switch { position:relative; width:34px; height:19px; display:inline-block; }
-    .switch input { opacity:0; width:0; height:0; }
-    .slider { position:absolute; inset:0; background:#c7d0db; border-radius:20px; transition:.18s; }
-    .slider:before { content:""; position:absolute; width:13px; height:13px; left:3px; top:3px; background:white; border-radius:50%; transition:.18s; box-shadow:0 1px 2px #0002; }
-    .switch input:checked + .slider { background:var(--blue); }
-    .switch input:checked + .slider:before { transform:translateX(15px); }
-    .metric-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:13px; margin:17px 0 22px; }
-    .metric { padding:15px 16px; background:#fff; border:1px solid var(--line); border-radius:11px; }
-    .metric-label { color:#78879a; font-size:10px; font-weight:750; text-transform:uppercase; letter-spacing:.65px; }
-    .metric-value { margin:7px 0 4px; font-size:23px; font-weight:780; letter-spacing:-.7px; }
-    .metric-foot { color:#718096; font-size:10px; }
-    .metric-foot strong { color:#0f766e; font-weight:700; }
-    .section-head { display:flex; justify-content:space-between; align-items:end; gap:12px; margin:0 0 12px; }
-    h2 { font-size:15px; margin:0; letter-spacing:-.2px; }
-    .section-hint { font-size:11px; color:#8190a1; }
-    .cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; align-items:stretch; }
-    .panel { background:#fff; border:1px solid var(--line); border-radius:12px; padding:17px; box-shadow:0 3px 15px rgba(24,36,51,.025); min-width:0; position:relative; transition:border .2s, transform .2s, box-shadow .2s; }
-    .panel.is-first { border-color:#95b5f5; box-shadow:0 0 0 2px #e5edff; }
-    .panel-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-    .panel-title-wrap { display:flex; gap:10px; align-items:center; min-width:0; }
-    .panel-icon { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; font-size:16px; background:#f1f5fa; flex:none; }
-    .panel h3 { font-size:13px; margin:0 0 3px; }
-    .panel-sub { color:#8491a1; font-size:10px; }
-    .panel-state { background:#f1f5f9; color:#64748b; padding:5px 7px; border-radius:20px; font-size:9px; font-weight:750; white-space:nowrap; }
-    .panel-state.warn { background:var(--amber-soft); color:var(--amber); }
-    .panel-body { margin:17px 0 14px; min-height:61px; }
-    .big-number { font-size:27px; font-weight:790; letter-spacing:-.8px; }
-    .detail { font-size:11px; color:#738196; margin-top:4px; }
-    .bar { height:7px; background:#edf1f5; border-radius:10px; overflow:hidden; margin-top:12px; }
-    .bar span { display:block; height:100%; border-radius:10px; background:#6b9be9; }
-    .mini-list { display:grid; gap:8px; font-size:11px; color:#536377; }
-    .mini-list div { display:flex; justify-content:space-between; gap:8px; }
-    .mini-list strong { color:#26384b; font-weight:700; }
-    .panel-footer { border-top:1px solid #eef2f6; padding-top:12px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .focus-count { color:#8a97a6; font-size:9px; }
-    .adapt-box { margin-top:17px; border:1px solid #d9e5f8; background:#f8fbff; border-radius:12px; padding:16px; }
-    .adapt-title { display:flex; align-items:center; gap:9px; font-size:12px; font-weight:780; margin-bottom:6px; }
-    .adapt-copy { color:#68788c; font-size:11px; line-height:1.55; }
-    .adapt-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
-    .hidden { display:none !important; }
-    .empty-state { display:flex; gap:10px; align-items:flex-start; }
-    .spark { width:25px; height:25px; flex:none; display:grid; place-items:center; border-radius:8px; background:#eaf1ff; color:#2255af; }
-    .toast { position:fixed; right:24px; bottom:22px; z-index:20; background:#182c42; color:#fff; padding:12px 15px; border-radius:9px; box-shadow:0 12px 36px #0c1c2e38; font-size:12px; max-width:min(420px, calc(100vw - 36px)); opacity:0; transform:translateY(8px); pointer-events:none; transition:.2s; }
-    .toast.show { opacity:1; transform:translateY(0); }
-    details.rules { margin-top:15px; border:1px solid var(--line); background:#fff; border-radius:10px; padding:12px 14px; }
-    details.rules summary { font-size:11px; color:#4c5f74; font-weight:700; cursor:pointer; }
-    details.rules p, details.rules li { color:#748397; font-size:10px; line-height:1.55; }
-    details.rules ul { padding-left:18px; margin-bottom:5px; }
-    .footer-note { color:#929eac; font-size:10px; margin-top:18px; line-height:1.5; }
-    .undo-strip { margin-top:11px; display:flex; justify-content:space-between; align-items:center; gap:10px; color:#77869a; font-size:10px; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: #25496c;
+      color: white;
+      font-weight: 800;
+    }
+
+    .top-meta {
+      color: #c8d5e3;
+      font-size: 12px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .pill {
+      border: 1px solid rgba(255,255,255,.23);
+      padding: 6px 10px;
+      border-radius: 30px;
+    }
+
+    .layout {
+      max-width: 1440px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 220px minmax(0,1fr);
+      min-height: calc(100vh - 68px);
+    }
+
+    aside {
+      padding: 26px 16px;
+      border-right: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .side-label {
+      padding: 0 12px;
+      color: #8a97a6;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin: 10px 0 12px;
+    }
+
+    .navitem {
+      display: flex;
+      gap: 11px;
+      align-items: center;
+      padding: 11px 12px;
+      border-radius: 9px;
+      color: #526276;
+      font-size: 13px;
+      margin: 3px 0;
+    }
+
+    .navitem.active {
+      color: #174ea6;
+      background: var(--blue-soft);
+      font-weight: 700;
+    }
+
+    .navicon {
+      width: 20px;
+      text-align: center;
+    }
+
+    .side-note {
+      margin: 28px 7px 0;
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    main {
+      padding: 30px clamp(18px,3vw,42px) 42px;
+      min-width: 0;
+    }
+
+    .heading-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 25px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .date {
+      color: #718096;
+      font-size: 12px;
+      padding-top: 7px;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 9px;
+      margin: 18px 0;
+    }
+
+    .btn {
+      border: 1px solid #d6dee8;
+      background: white;
+      color: #27384a;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 650;
+      transition: .15s;
+    }
+
+    .btn:hover {
+      background: #f8fafc;
+      border-color: #9eafc2;
+    }
+
+    .btn.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: white;
+    }
+
+    .btn.primary:hover { background: #1d4ed8; }
+
+    .btn.subtle {
+      border-color: transparent;
+      background: transparent;
+      color: #53657a;
+    }
+
+    .btn.small {
+      padding: 7px 10px;
+      font-size: 11px;
+    }
+
+    .statebar {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .state-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .state-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #d08a20;
+      box-shadow: 0 0 0 4px #fff3dc;
+      flex: none;
+    }
+
+    .state-title {
+      font-weight: 750;
+      font-size: 12px;
+    }
+
+    .state-caption {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .state-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .state-tag {
+      padding: 6px 9px;
+      border-radius: 30px;
+      background: #f0f4f8;
+      color: #526276;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #566578;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .switch {
+      position: relative;
+      width: 34px;
+      height: 19px;
+      display: inline-block;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #c7d0db;
+      border-radius: 20px;
+      transition: .18s;
+    }
+
+    .slider:before {
+      content: "";
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: .18s;
+    }
+
+    .switch input:checked + .slider {
+      background: var(--blue);
+    }
+
+    .switch input:checked + .slider:before {
+      transform: translateX(15px);
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(4,minmax(0,1fr));
+      gap: 13px;
+      margin: 17px 0 22px;
+    }
+
+    .metric {
+      padding: 15px 16px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+    }
+
+    .metric-label {
+      color: #78879a;
+      font-size: 10px;
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      margin: 7px 0 4px;
+      font-size: 23px;
+      font-weight: 780;
+    }
+
+    .metric-foot {
+      color: #718096;
+      font-size: 10px;
+    }
+
+    .metric-foot strong {
+      color: var(--teal);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .section-hint {
+      font-size: 11px;
+      color: #8190a1;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 14px;
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 17px;
+      box-shadow: 0 3px 15px rgba(24,36,51,.025);
+      min-width: 0;
+      transition: .2s;
+    }
+
+    .panel.is-first {
+      border-color: #95b5f5;
+      box-shadow: 0 0 0 2px #e5edff;
+    }
+
+    .panel-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .panel-title-wrap {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .panel-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      background: #f1f5fa;
+      flex: none;
+    }
+
+    .panel h3 {
+      font-size: 13px;
+      margin: 0 0 3px;
+    }
+
+    .panel-sub {
+      color: #8491a1;
+      font-size: 10px;
+    }
+
+    .panel-state {
+      background: #f1f5f9;
+      color: #64748b;
+      padding: 5px 7px;
+      border-radius: 20px;
+      font-size: 9px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .panel-state.warn {
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .panel-body {
+      margin: 17px 0 14px;
+      min-height: 61px;
+    }
+
+    .big-number {
+      font-size: 27px;
+      font-weight: 790;
+    }
+
+    .detail {
+      font-size: 11px;
+      color: #738196;
+      margin-top: 4px;
+    }
+
+    .bar {
+      height: 7px;
+      background: #edf1f5;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: 10px;
+      background: #6b9be9;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 8px;
+      font-size: 11px;
+      color: #536377;
+    }
+
+    .mini-list div {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .mini-list strong {
+      color: #26384b;
+    }
+
+    .panel-footer {
+      border-top: 1px solid #eef2f6;
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .focus-count {
+      color: #8a97a6;
+      font-size: 9px;
+    }
+
+    .adapt-box {
+      margin-top: 17px;
+      border: 1px solid #d9e5f8;
+      background: #f8fbff;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .adapt-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 12px;
+      font-weight: 780;
+      margin-bottom: 6px;
+    }
+
+    .adapt-copy {
+      color: #68788c;
+      font-size: 11px;
+      line-height: 1.55;
+    }
+
+    .adapt-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .hidden { display: none !important; }
+
+    .empty-state {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .spark {
+      width: 25px;
+      height: 25px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #eaf1ff;
+      color: #2255af;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 22px;
+      z-index: 20;
+      background: #182c42;
+      color: white;
+      padding: 12px 15px;
+      border-radius: 9px;
+      font-size: 12px;
+      max-width: min(420px,calc(100vw - 36px));
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: .2s;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    details.rules {
+      margin-top: 15px;
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    details.rules summary {
+      font-size: 11px;
+      color: #4c5f74;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    details.rules p,
+    details.rules li {
+      color: #748397;
+      font-size: 10px;
+      line-height: 1.55;
+    }
+
+    details.rules ul {
+      padding-left: 18px;
+    }
+
+    .footer-note {
+      color: #929eac;
+      font-size: 10px;
+      margin-top: 18px;
+      line-height: 1.5;
+    }
+
+    .undo-strip {
+      margin-top: 11px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: #77869a;
+      font-size: 10px;
+    }
+
     @media (max-width: 900px) {
-      .layout { grid-template-columns:1fr; }
-      aside { display:none; }
-      main { padding:24px 20px 36px; }
-      .metric-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .layout { grid-template-columns: 1fr; }
+      aside { display: none; }
+      main { padding: 24px 20px 36px; }
+      .metric-row { grid-template-columns: repeat(2,minmax(0,1fr)); }
     }
+
     @media (max-width: 600px) {
-      .topbar { padding:0 16px; height:60px; }
-      .top-meta { font-size:10px; }
-      .top-meta .pill { display:none; }
-      .heading-row { display:block; }
-      .date { padding-top:8px; }
-      .statebar { align-items:flex-start; flex-direction:column; }
-      .state-right { width:100%; justify-content:space-between; }
-      .cards { grid-template-columns:1fr; }
-      .metric-row { gap:9px; }
-      .metric { padding:12px; }
-      .metric-value { font-size:20px; }
-      .section-head { align-items:flex-start; flex-direction:column; }
+      .topbar { padding: 0 16px; height: 60px; }
+      .top-meta { font-size: 10px; }
+      .top-meta .pill { display: none; }
+      .heading-row { display: block; }
+      .date { padding-top: 8px; }
+      .statebar { align-items: flex-start; flex-direction: column; }
+      .state-right { width: 100%; justify-content: space-between; }
+      .cards { grid-template-columns: 1fr; }
+      .metric-row { gap: 9px; }
+      .metric { padding: 12px; }
+      .metric-value { font-size: 20px; }
+      .section-head { align-items: flex-start; flex-direction: column; }
     }
   </style>
 </head>
+
 <body>
-  <header class="topbar">
-    <div class="brand"><div class="brand-mark">N</div><span>Northstar Operations</span></div>
-    <div class="top-meta"><span class="pill">DEMO ENVIRONMENT · ILLUSTRATIVE DATA</span><span>◉&nbsp; Analyst workspace</span></div>
-  </header>
-  <div class="layout">
-    <aside aria-label="Main navigation">
-      <div class="side-label">Workspace</div>
-      <div class="navitem active"><span class="navicon">▦</span>Overview</div>
-      <div class="navitem"><span class="navicon">◫</span>Equipment</div>
-      <div class="navitem"><span class="navicon">◷</span>Maintenance</div>
-      <div class="navitem"><span class="navicon">⌁</span>Activity</div>
-      <div class="side-label" style="margin-top:30px">Prototype</div>
-      <div class="navitem"><span class="navicon">✳</span>Adaptive interface</div>
-      <div class="side-note"><strong style="color:#3b4d62">What is this?</strong><br/>A working simulation of a dashboard that learns which panels you focus on and gradually changes from recommendations to low-risk automatic layout changes.</div>
-    </aside>
-    <main>
-      <div class="heading-row">
-        <div><h1>Operations overview</h1><div class="subtitle">Monitor performance, availability and maintenance activity across the site.</div></div>
-        <div class="date">Monday, 23 November 2026 &nbsp; · &nbsp; Shift A</div>
-      </div>
-      <div class="toolbar">
-        <button class="btn" id="nextSession">↻ Start next session</button>
-        <button class="btn" id="undoButton" disabled>↶ Undo last change</button>
-        <button class="btn subtle" id="resetButton">Reset learning</button>
-      </div>
-      <section class="statebar" aria-label="Adaptation status">
-        <div class="state-left">
-          <span class="state-dot" id="stateDot"></span>
-          <div><div class="state-title" id="autonomyTitle">Recommendation mode</div><div class="state-caption" id="autonomyCaption">The system asks before changing your dashboard.</div></div>
-        </div>
-        <div class="state-right">
-          <span class="state-tag" id="sessionTag">SESSION 1</span>
-          <span class="state-tag" id="learningTag">0 PREFERENCES LEARNED</span>
-          <label class="toggle-wrap">Allow low-risk automatic changes
-            <span class="switch"><input type="checkbox" id="autoToggle" checked aria-label="Allow low-risk automatic changes"><span class="slider"></span></span>
-          </label>
-        </div>
-      </section>
-      <section class="metric-row" aria-label="Operational summary">
-        <div class="metric"><div class="metric-label">Open alerts</div><div class="metric-value">08</div><div class="metric-foot"><strong>2 priority</strong> · illustrative</div></div>
-        <div class="metric"><div class="metric-label">Equipment online</div><div class="metric-value">14 / 16</div><div class="metric-foot"><strong>87.5%</strong> availability</div></div>
-        <div class="metric"><div class="metric-label">Current throughput</div><div class="metric-value">1,284</div><div class="metric-foot">units per hour</div></div>
-        <div class="metric"><div class="metric-label">Jobs due today</div><div class="metric-value">05</div><div class="metric-foot">maintenance queue</div></div>
-      </section>
-      <div class="section-head"><h2>Your monitoring panels</h2><div class="section-hint">Select “Focus this panel” to simulate a work preference.</div></div>
-      <section class="cards" id="cards" aria-live="polite">
-        <article class="panel" data-panel="alerts">
-          <div class="panel-top"><div class="panel-title-wrap"><div class="panel-icon" style="background:#fff1e9">⚑</div><div><h3>Priority alerts</h3><div class="panel-sub">Events requiring attention</div></div></div><span class="panel-state warn">2 priority</span></div>
-          <div class="panel-body"><div class="big-number">08 open</div><div class="detail">2 high · 3 medium · 3 low priority</div><div class="bar"><span style="width:38%;background:#e9a04a"></span></div></div>
-          <div class="panel-footer"><span class="focus-count" data-count="alerts">Focused 0 times this session</span><button class="btn small focus-btn" data-focus="alerts">Focus this panel</button></div>
-        </article>
-        <article class="panel" data-panel="equipment">
-          <div class="panel-top"><div class="panel-title-wrap"><div class="panel-icon" style="background:#eaf1ff">▣</div><div><h3>Equipment status</h3><div class="panel-sub">Site availability overview</div></div></div><span class="panel-state">Live status (mock)</span></div>
-          <div class="panel-body"><div class="big-number">14 / 16</div><div class="detail">Two units require inspection</div><div class="bar"><span style="width:87.5%"></span></div></div>
-          <div class="panel-footer"><span class="focus-count" data-count="equipment">Focused 0 times this session</span><button class="btn small focus-btn" data-focus="equipment">Focus this panel</button></div>
-        </article>
-        <article class="panel" data-panel="throughput">
-          <div class="panel-top"><div class="panel-title-wrap"><div class="panel-icon" style="background:#e7f7f2">⌁</div><div><h3>Throughput</h3><div class="panel-sub">Production performance</div></div></div><span class="panel-state">Within target</span></div>
-          <div class="panel-body"><div class="big-number">1,284 <span style="font-size:12px;color:#748397;font-weight:600">units/hr</span></div><div class="detail">Target: 1,250 units per hour</div><div class="bar"><span style="width:76%;background:#38a28d"></span></div></div>
-          <div class="panel-footer"><span class="focus-count" data-count="throughput">Focused 0 times this session</span><button class="btn small focus-btn" data-focus="throughput">Focus this panel</button></div>
-        </article>
-        <article class="panel" data-panel="maintenance">
-          <div class="panel-top"><div class="panel-title-wrap"><div class="panel-icon" style="background:#f1edff">◷</div><div><h3>Maintenance queue</h3><div class="panel-sub">Planned and overdue work</div></div></div><span class="panel-state">5 jobs</span></div>
-          <div class="panel-body"><div class="mini-list"><div><span>Inspection overdue</span><strong>02</strong></div><div><span>Due this shift</span><strong>02</strong></div><div><span>Scheduled</span><strong>01</strong></div></div></div>
-          <div class="panel-footer"><span class="focus-count" data-count="maintenance">Focused 0 times this session</span><button class="btn small focus-btn" data-focus="maintenance">Focus this panel</button></div>
-        </article>
-      </section>
-      <section class="adapt-box" id="adaptBox" aria-live="polite">
-        <div class="empty-state" id="emptyState"><div class="spark">✳</div><div><div class="adapt-title">Adaptive assistant · simulated</div><div class="adapt-copy">Work normally by focusing on the panels you use. After the same panel is focused twice in one session, the prototype can suggest moving it to the top. Acceptances are remembered across sessions; after two accepted suggestions for the same panel, future low-risk changes can happen automatically.</div></div></div>
-        <div id="suggestionState" class="hidden">
-          <div class="adapt-title"><span class="spark">✳</span><span id="suggestionHeading">Suggested layout change</span></div>
-          <div class="adapt-copy" id="suggestionText"></div>
-          <div class="adapt-actions"><button class="btn primary" id="acceptButton">Apply suggested layout</button><button class="btn" id="rejectButton">Keep current layout</button></div>
-        </div>
-        <div id="autoState" class="hidden">
-          <div class="adapt-title"><span class="spark">✓</span><span>Automatic layout adjustment</span></div>
-          <div class="adapt-copy" id="autoText"></div>
-          <div class="adapt-actions"><button class="btn" id="undoInline">Undo this change</button><button class="btn" id="pauseInline">Pause automatic changes</button></div>
-        </div>
-      </section>
-      <div class="undo-strip"><span id="interactionStatus">No layout changes have been made in this session.</span><span>Layout changes affect presentation only.</span></div>
-      <details class="rules">
-        <summary>How the simulated adaptation works</summary>
-        <ul>
-          <li>Two focus actions on the same panel in one session trigger an adaptation decision.</li>
-          <li>Before a panel has two accepted suggestions, the system asks for confirmation.</li>
-          <li>After two accepted suggestions for that panel, the next session can apply the same low-risk change automatically when the toggle is on.</li>
-          <li>Rejecting a suggestion suppresses another prompt for that panel during the current session. Starting a new session clears the session focus counts but preserves learned preferences.</li>
-          <li>Undo reverses the latest layout change and reduces the acceptance count for that adaptation. “Reset learning” clears all local preferences and returns to the initial layout.</li>
-        </ul>
-        <p><strong>Scope:</strong> This is a deterministic, rule-based simulation of adaptive behaviour. It does not use a trained machine-learning model, external API, live operational data or real equipment telemetry. All displayed values are illustrative.</p>
-      </details>
-      <div class="footer-note">Student prototype for interaction-design assessment. No real operational decisions should be made using this demonstration.</div>
-    </main>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">A</div>
+    <span>Adaptive Dashboard</span>
   </div>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script>
-    (() => {
-      const DEFAULT_ORDER = ['alerts', 'equipment', 'throughput', 'maintenance'];
-      const LABELS = { alerts: 'Priority alerts', equipment: 'Equipment status', throughput: 'Throughput', maintenance: 'Maintenance queue' };
-      const STORE_KEY = 'northstar-adaptive-dashboard-v1';
-      const freshState = () => ({
-        order: [...DEFAULT_ORDER],
-        focus: { alerts: 0, equipment: 0, throughput: 0, maintenance: 0 },
-        accepted: { alerts: 0, equipment: 0, throughput: 0, maintenance: 0 },
-        rejected: { alerts: false, equipment: false, throughput: false, maintenance: false },
-        session: 1,
-        autoEnabled: true,
-        lastChange: null,
-        currentPrompt: null,
-        lastMessage: 'No layout changes have been made in this session.'
-      });
-      let state = loadState();
-      let toastTimer;
-      const $ = (id) => document.getElementById(id);
-      const cards = $('cards');
-      function loadState() {
-        try {
-          const saved = JSON.parse(localStorage.getItem(STORE_KEY));
-          if (!saved || !Array.isArray(saved.order)) return freshState();
-          const base = freshState();
-          return { ...base, ...saved,
-            order: DEFAULT_ORDER.filter(id => saved.order.includes(id)).concat(DEFAULT_ORDER.filter(id => !saved.order.includes(id))),
-            focus: { ...base.focus, ...(saved.focus || {}) }, accepted: { ...base.accepted, ...(saved.accepted || {}) },
-            rejected: { ...base.rejected, ...(saved.rejected || {}) } };
-        } catch { return freshState(); }
+  <div class="top-meta">
+    <span class="pill">DEMO ENVIRONMENT · ILLUSTRATIVE DATA</span>
+    <span>◉ Analyst workspace</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside aria-label="Main navigation">
+    <div class="side-label">Workspace</div>
+    <div class="navitem active"><span class="navicon">▦</span>Overview</div>
+    <div class="navitem"><span class="navicon">◫</span>Equipment</div>
+    <div class="navitem"><span class="navicon">◷</span>Maintenance</div>
+    <div class="navitem"><span class="navicon">⌁</span>Activity</div>
+
+    <div class="side-label" style="margin-top:30px">Prototype</div>
+    <div class="navitem"><span class="navicon">✳</span>Adaptive interface</div>
+
+    <div class="side-note">
+      <strong style="color:#3b4d62">What is this?</strong><br>
+      A working simulation of a dashboard that learns which panels you focus on and gradually changes from recommendations to low-risk automatic layout changes.
+    </div>
+  </aside>
+
+  <main>
+
+    <div class="heading-row">
+      <div>
+        <h1>Operations overview</h1>
+        <div class="subtitle">
+          Monitor performance, availability and maintenance activity across the site.
+        </div>
+      </div>
+      <div class="date">Operations dashboard · Shift A</div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn" id="nextSession">↻ Start next session</button>
+      <button class="btn" id="undoButton" disabled>↶ Undo last change</button>
+      <button class="btn subtle" id="resetButton">Reset learning</button>
+    </div>
+
+    <section class="statebar" aria-label="Adaptation status">
+      <div class="state-left">
+        <span class="state-dot" id="stateDot"></span>
+        <div>
+          <div class="state-title" id="autonomyTitle">Recommendation mode</div>
+          <div class="state-caption" id="autonomyCaption">
+            The system asks before changing your dashboard.
+          </div>
+        </div>
+      </div>
+
+      <div class="state-right">
+        <span class="state-tag" id="sessionTag">SESSION 1</span>
+        <span class="state-tag" id="learningTag">0 PREFERENCES LEARNED</span>
+
+        <label class="toggle-wrap">
+          Allow low-risk automatic changes
+          <span class="switch">
+            <input type="checkbox" id="autoToggle" checked aria-label="Allow low-risk automatic changes">
+            <span class="slider"></span>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <section class="metric-row" aria-label="Operational summary">
+      <div class="metric">
+        <div class="metric-label">Open alerts</div>
+        <div class="metric-value">08</div>
+        <div class="metric-foot"><strong>2 priority</strong> · illustrative</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-label">Equipment online</div>
+        <div class="metric-value">14 / 16</div>
+        <div class="metric-foot"><strong>87.5%</strong> availability</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-label">Current throughput</div>
+        <div class="metric-value">1,284</div>
+        <div class="metric-foot">units per hour</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-label">Jobs due today</div>
+        <div class="metric-value">05</div>
+        <div class="metric-foot">maintenance queue</div>
+      </div>
+    </section>
+
+    <div class="section-head">
+      <h2>Your monitoring panels</h2>
+      <div class="section-hint">
+        Select “Focus this panel” to simulate a work preference.
+      </div>
+    </div>
+
+    <section class="cards" id="cards" aria-live="polite">
+
+      <article class="panel" data-panel="alerts">
+        <div class="panel-top">
+          <div class="panel-title-wrap">
+            <div class="panel-icon" style="background:#fff1e9">⚑</div>
+            <div>
+              <h3>Priority alerts</h3>
+              <div class="panel-sub">Events requiring attention</div>
+            </div>
+          </div>
+          <span class="panel-state warn">2 priority</span>
+        </div>
+
+        <div class="panel-body">
+          <div class="big-number">08 open</div>
+          <div class="detail">2 high · 3 medium · 3 low priority</div>
+          <div class="bar"><span style="width:38%;background:#e9a04a"></span></div>
+        </div>
+
+        <div class="panel-footer">
+          <span class="focus-count" data-count="alerts">Focused 0 times this session</span>
+          <button class="btn small focus-btn" data-focus="alerts">Focus this panel</button>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="equipment">
+        <div class="panel-top">
+          <div class="panel-title-wrap">
+            <div class="panel-icon" style="background:#eaf1ff">▣</div>
+            <div>
+              <h3>Equipment status</h3>
+              <div class="panel-sub">Site availability overview</div>
+            </div>
+          </div>
+          <span class="panel-state">Illustrative status</span>
+        </div>
+
+        <div class="panel-body">
+          <div class="big-number">14 / 16</div>
+          <div class="detail">Two units require inspection</div>
+          <div class="bar"><span style="width:87.5%"></span></div>
+        </div>
+
+        <div class="panel-footer">
+          <span class="focus-count" data-count="equipment">Focused 0 times this session</span>
+          <button class="btn small focus-btn" data-focus="equipment">Focus this panel</button>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="throughput">
+        <div class="panel-top">
+          <div class="panel-title-wrap">
+            <div class="panel-icon" style="background:#e7f7f2">⌁</div>
+            <div>
+              <h3>Throughput</h3>
+              <div class="panel-sub">Production performance</div>
+            </div>
+          </div>
+          <span class="panel-state">Within target</span>
+        </div>
+
+        <div class="panel-body">
+          <div class="big-number">1,284 <span style="font-size:12px;color:#748397">units/hr</span></div>
+          <div class="detail">Target: 1,250 units per hour</div>
+          <div class="bar"><span style="width:76%;background:#38a28d"></span></div>
+        </div>
+
+        <div class="panel-footer">
+          <span class="focus-count" data-count="throughput">Focused 0 times this session</span>
+          <button class="btn small focus-btn" data-focus="throughput">Focus this panel</button>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="maintenance">
+        <div class="panel-top">
+          <div class="panel-title-wrap">
+            <div class="panel-icon" style="background:#f1edff">◷</div>
+            <div>
+              <h3>Maintenance queue</h3>
+              <div class="panel-sub">Planned and overdue work</div>
+            </div>
+          </div>
+          <span class="panel-state">5 jobs</span>
+        </div>
+
+        <div class="panel-body">
+          <div class="mini-list">
+            <div><span>Inspection overdue</span><strong>02</strong></div>
+            <div><span>Due this shift</span><strong>02</strong></div>
+            <div><span>Scheduled</span><strong>01</strong></div>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <span class="focus-count" data-count="maintenance">Focused 0 times this session</span>
+          <button class="btn small focus-btn" data-focus="maintenance">Focus this panel</button>
+        </div>
+      </article>
+
+    </section>
+
+    <section class="adapt-box" id="adaptBox" aria-live="polite">
+
+      <div class="empty-state" id="emptyState">
+        <div class="spark">✳</div>
+        <div>
+          <div class="adapt-title">Adaptive assistant · simulated</div>
+          <div class="adapt-copy">
+            Work normally by focusing on the panels you use. After the same panel is focused twice in one session, the prototype can suggest moving it to the top. Acceptances are remembered across sessions; after two accepted suggestions for the same panel, future low-risk changes can happen automatically.
+          </div>
+        </div>
+      </div>
+
+      <div id="suggestionState" class="hidden">
+        <div class="adapt-title">
+          <span class="spark">✳</span>
+          <span id="suggestionHeading">Suggested layout change</span>
+        </div>
+        <div class="adapt-copy" id="suggestionText"></div>
+        <div class="adapt-actions">
+          <button class="btn primary" id="acceptButton">Apply suggested layout</button>
+          <button class="btn" id="rejectButton">Keep current layout</button>
+        </div>
+      </div>
+
+      <div id="autoState" class="hidden">
+        <div class="adapt-title">
+          <span class="spark">✓</span>
+          <span>Automatic layout adjustment</span>
+        </div>
+        <div class="adapt-copy" id="autoText"></div>
+        <div class="adapt-actions">
+          <button class="btn" id="undoInline">Undo this change</button>
+          <button class="btn" id="pauseInline">Pause automatic changes</button>
+        </div>
+      </div>
+
+    </section>
+
+    <div class="undo-strip">
+      <span id="interactionStatus">No layout changes have been made in this session.</span>
+      <span>Layout changes affect presentation only.</span>
+    </div>
+
+    <details class="rules">
+      <summary>How the simulated adaptation works</summary>
+      <ul>
+        <li>Two focus actions on the same panel in one session trigger an adaptation decision.</li>
+        <li>Before a panel has two accepted suggestions, the system asks for confirmation.</li>
+        <li>After two accepted suggestions for that panel, the next session can apply the same low-risk change automatically when the toggle is on.</li>
+        <li>Rejecting a suggestion suppresses another prompt for that panel during the current session. Starting a new session clears the focus counts but keeps learned preferences.</li>
+        <li>Undo reverses the latest layout change and reduces the acceptance count for that adaptation.</li>
+        <li>Reset learning clears all local preferences and returns to the initial layout.</li>
+      </ul>
+
+      <p>
+        <strong>Scope:</strong> This is a deterministic, rule-based simulation. It does not use a trained machine-learning model, external API, live operational data or real equipment telemetry. All displayed values are illustrative.
+      </p>
+    </details>
+
+    <div class="footer-note">
+      Student prototype for interaction-design assessment. No real operational decisions should be made using this demonstration.
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+
+  const DEFAULT_ORDER = [
+    'alerts',
+    'equipment',
+    'throughput',
+    'maintenance'
+  ];
+
+  const LABELS = {
+    alerts: 'Priority alerts',
+    equipment: 'Equipment status',
+    throughput: 'Throughput',
+    maintenance: 'Maintenance queue'
+  };
+
+  const STORE_KEY = 'progressive-adaptive-dashboard-v1';
+
+  const freshState = () => ({
+    order: [...DEFAULT_ORDER],
+
+    focus: {
+      alerts: 0,
+      equipment: 0,
+      throughput: 0,
+      maintenance: 0
+    },
+
+    accepted: {
+      alerts: 0,
+      equipment: 0,
+      throughput: 0,
+      maintenance: 0
+    },
+
+    rejected: {
+      alerts: false,
+      equipment: false,
+      throughput: false,
+      maintenance: false
+    },
+
+    session: 1,
+    autoEnabled: true,
+    lastChange: null,
+    currentPrompt: null,
+    lastMessage: 'No layout changes have been made in this session.'
+  });
+
+  let state = loadState();
+  let toastTimer;
+
+  const $ = id => document.getElementById(id);
+  const cards = $('cards');
+
+  function loadState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+
+      if (!saved || !Array.isArray(saved.order)) {
+        return freshState();
       }
-      function save() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
-      function showToast(message) {
-        $('toast').textContent = message; $('toast').classList.add('show');
-        clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('show'), 2800);
+
+      const base = freshState();
+
+      return {
+        ...base,
+        ...saved,
+
+        order: DEFAULT_ORDER
+          .filter(id => saved.order.includes(id))
+          .concat(DEFAULT_ORDER.filter(id => !saved.order.includes(id))),
+
+        focus: { ...base.focus, ...(saved.focus || {}) },
+        accepted: { ...base.accepted, ...(saved.accepted || {}) },
+        rejected: { ...base.rejected, ...(saved.rejected || {}) }
+      };
+
+    } catch {
+      return freshState();
+    }
+  }
+
+  function save() {
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  }
+
+  function showToast(message) {
+    $('toast').textContent = message;
+    $('toast').classList.add('show');
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+      $('toast').classList.remove('show');
+    }, 2800);
+  }
+
+  function render() {
+
+    state.order.forEach(id => {
+      cards.appendChild(cards.querySelector(`[data-panel="${id}"]`));
+    });
+
+    cards.querySelectorAll('.panel').forEach((panel, index) => {
+
+      panel.classList.toggle('is-first', index === 0);
+
+      const id = panel.dataset.panel;
+
+      panel.querySelector(`[data-count="${id}"]`).textContent =
+        `Focused ${state.focus[id]} times this session`;
+
+    });
+
+    const learned = Object.values(state.accepted)
+      .filter(n => n >= 2).length;
+
+    $('sessionTag').textContent = `SESSION ${state.session}`;
+
+    $('learningTag').textContent =
+      `${learned} PREFERENCE${learned === 1 ? '' : 'S'} LEARNED`;
+
+    $('autoToggle').checked = state.autoEnabled;
+
+    $('undoButton').disabled = !state.lastChange;
+
+    $('interactionStatus').textContent = state.lastMessage;
+
+    const hasLearned = learned > 0;
+
+    $('autonomyTitle').textContent = hasLearned
+      ? 'Progressive automation available'
+      : 'Recommendation mode';
+
+    $('autonomyCaption').textContent = hasLearned
+      ? 'Repeated accepted changes can now be automated for learned panels.'
+      : 'The system asks before changing your dashboard.';
+
+    $('stateDot').style.background =
+      hasLearned ? '#15917e' : '#d08a20';
+
+    $('stateDot').style.boxShadow = hasLearned
+      ? '0 0 0 4px #e2f7f1'
+      : '0 0 0 4px #fff3dc';
+
+    const autoApplied =
+      !!state.lastChange && state.lastChange.kind === 'automatic';
+
+    $('emptyState').classList.toggle(
+      'hidden',
+      !!state.currentPrompt || autoApplied
+    );
+
+    $('suggestionState').classList.toggle(
+      'hidden',
+      !state.currentPrompt
+    );
+
+    $('autoState').classList.toggle(
+      'hidden',
+      !autoApplied
+    );
+
+    if (autoApplied) {
+      $('autoText').textContent =
+        `${LABELS[state.lastChange.id]} was moved because you accepted this same low-risk layout change in two earlier sessions. The automatic setting is on. Use Undo or pause automatic changes at any time.`;
+    }
+
+    if (state.currentPrompt) {
+
+      const id = state.currentPrompt;
+
+      $('suggestionHeading').textContent =
+        `Move ${LABELS[id]} to the top?`;
+
+      $('suggestionText').textContent =
+        `You focused "${LABELS[id]}" twice in this session. Moving it to the first position may make your frequent task easier to reach. This is a low-risk layout change only; the information and metrics will not change. You can keep the current layout or undo the change afterwards.`;
+    }
+
+    save();
+  }
+
+  function moveToTop(id, kind) {
+
+    const previous = [...state.order];
+
+    state.order = [
+      id,
+      ...state.order.filter(x => x !== id)
+    ];
+
+    state.lastChange = { id, previous, kind };
+
+    state.currentPrompt = null;
+
+    state.lastMessage = kind === 'automatic'
+      ? `${LABELS[id]} moved to the top automatically after two previously accepted suggestions.`
+      : `${LABELS[id]} moved to the top after your confirmation.`;
+
+    render();
+
+    if (kind === 'automatic') {
+      showToast('A learned layout preference was applied automatically.');
+    } else {
+      showToast('Your dashboard layout was updated.');
+    }
+  }
+
+  function focusPanel(id) {
+
+    state.focus[id] += 1;
+
+    state.lastMessage =
+      `You focused ${LABELS[id]} (${state.focus[id]} times this session).`;
+
+    const ready =
+      state.focus[id] >= 2 &&
+      state.order[0] !== id &&
+      !state.rejected[id];
+
+    if (ready) {
+
+      if (state.accepted[id] >= 2 && state.autoEnabled) {
+        moveToTop(id, 'automatic');
+        return;
       }
-      function render() {
-        state.order.forEach(id => cards.appendChild(cards.querySelector(`[data-panel="${id}"]`)));
-        cards.querySelectorAll('.panel').forEach((panel, index) => {
-          panel.classList.toggle('is-first', index === 0);
-          const id = panel.dataset.panel;
-          panel.querySelector(`[data-count="${id}"]`).textContent = `Focused ${state.focus[id]} times this session`;
-        });
-        const learned = Object.values(state.accepted).filter(n => n >= 2).length;
-        $('sessionTag').textContent = `SESSION ${state.session}`;
-        $('learningTag').textContent = `${learned} PREFERENCE${learned === 1 ? '' : 'S'} LEARNED`;
-        $('autoToggle').checked = state.autoEnabled;
-        $('undoButton').disabled = !state.lastChange;
-        $('interactionStatus').textContent = state.lastMessage;
-        const hasLearned = learned > 0;
-        $('autonomyTitle').textContent = hasLearned ? 'Progressive automation available' : 'Recommendation mode';
-        $('autonomyCaption').textContent = hasLearned ? 'Repeated accepted changes can now be automated for learned panels.' : 'The system asks before changing your dashboard.';
-        $('stateDot').style.background = hasLearned ? '#15917e' : '#d08a20';
-        $('stateDot').style.boxShadow = hasLearned ? '0 0 0 4px #e2f7f1' : '0 0 0 4px #fff3dc';
-        const autoApplied = !!state.lastChange && state.lastChange.kind === 'automatic';
-        $('emptyState').classList.toggle('hidden', !!state.currentPrompt || autoApplied);
-        $('suggestionState').classList.toggle('hidden', !state.currentPrompt);
-        $('autoState').classList.toggle('hidden', !autoApplied);
-        if (autoApplied) $('autoText').textContent = `${LABELS[state.lastChange.id]} was moved because you accepted this same low-risk layout change in two earlier sessions. The automatic setting is on. Use Undo or pause automatic changes at any time.`;
-        if (state.currentPrompt) {
-          const id = state.currentPrompt;
-          $('suggestionHeading').textContent = `Move ${LABELS[id]} to the top?`;
-          $('suggestionText').textContent = `You focused “${LABELS[id]}” twice in this session. Moving it to the first position may make your frequent task easier to reach. This is a low-risk layout change only; the information and metrics will not change. You can keep the current layout or undo the change afterwards.`;
-        }
-        save();
-      }
-      function moveToTop(id, kind) {
-        const previous = [...state.order];
-        state.order = [id, ...state.order.filter(x => x !== id)];
-        state.lastChange = { id, previous, kind };
-        state.currentPrompt = null;
-        state.lastMessage = kind === 'automatic'
-          ? `${LABELS[id]} moved to the top automatically after two previously accepted suggestions.`
-          : `${LABELS[id]} moved to the top after your confirmation.`;
-        render();
-        if (kind === 'automatic') {
-          showToast('A learned layout preference was applied automatically.');
-        } else showToast('Your dashboard layout was updated.');
-      }
-      function focusPanel(id) {
-        state.focus[id] += 1;
-        state.lastMessage = `You focused ${LABELS[id]} (${state.focus[id]} time${state.focus[id] === 1 ? '' : 's'} this session).`;
-        const ready = state.focus[id] >= 2 && state.order[0] !== id && !state.rejected[id];
-        if (ready) {
-          if (state.accepted[id] >= 2 && state.autoEnabled) {
-            moveToTop(id, 'automatic');
-            return;
-          }
-          state.currentPrompt = id;
-          render();
-          showToast('The assistant has a layout suggestion for you.');
-          return;
-        }
-        render();
-        if (state.order[0] === id) showToast(`${LABELS[id]} is already at the top of your dashboard.`);
-        else showToast(`Focus recorded for ${LABELS[id]}.`);
-      }
-      function acceptSuggestion() {
-        const id = state.currentPrompt;
-        if (!id) return;
-        state.accepted[id] += 1;
-        moveToTop(id, 'accepted');
-        if (state.accepted[id] >= 2) showToast(`Preference learned: ${LABELS[id]} can be automated next session.`);
-      }
-      function rejectSuggestion() {
-        const id = state.currentPrompt;
-        if (!id) return;
-        state.rejected[id] = true; state.currentPrompt = null;
-        state.lastMessage = `You kept the current layout. ${LABELS[id]} will not be suggested again in this session.`;
-        render(); showToast('Current layout kept. The suggestion is dismissed for this session.');
-      }
-      function undo() {
-        if (!state.lastChange) return;
-        const change = state.lastChange;
-        state.order = [...change.previous];
-        if (change.kind === 'accepted') state.accepted[change.id] = Math.max(0, state.accepted[change.id] - 1);
-        if (change.kind === 'automatic' && state.accepted[change.id] >= 2) state.accepted[change.id] = 1;
-        state.lastChange = null; state.currentPrompt = null;
-        state.lastMessage = `Last layout change undone. ${LABELS[change.id]} will require confirmation again.`;
-        render(); showToast('Layout restored. Future changes will ask for confirmation again.');
-      }
-      $('nextSession').addEventListener('click', () => {
-        state.session += 1; state.order = [...DEFAULT_ORDER];
-        state.focus = { alerts: 0, equipment: 0, throughput: 0, maintenance: 0 };
-        state.rejected = { alerts: false, equipment: false, throughput: false, maintenance: false };
-        state.currentPrompt = null; state.lastChange = null;
-        state.lastMessage = `Session ${state.session} started. Learned preferences have been kept; the layout has returned to its default order for this demonstration.`;
-        render(); showToast(`Session ${state.session} started. Preference history retained.`);
-      });
-      $('undoButton').addEventListener('click', undo);
-      $('undoInline').addEventListener('click', undo);
-      $('acceptButton').addEventListener('click', acceptSuggestion);
-      $('rejectButton').addEventListener('click', rejectSuggestion);
-      $('autoToggle').addEventListener('change', (event) => {
-        state.autoEnabled = event.target.checked; render();
-        showToast(state.autoEnabled ? 'Low-risk automatic changes enabled.' : 'Automatic changes paused. Confirmation will be required.');
-      });
-      $('pauseInline').addEventListener('click', () => { state.autoEnabled = false; render(); showToast('Automatic changes paused.'); });
-      $('resetButton').addEventListener('click', () => {
-        state = freshState(); localStorage.removeItem(STORE_KEY); render(); showToast('All learned preferences and layout changes were reset.');
-      });
-      cards.addEventListener('click', (event) => {
-        const button = event.target.closest('[data-focus]');
-        if (button) focusPanel(button.dataset.focus);
-      });
+
+      state.currentPrompt = id;
+
       render();
-    })();
-  </script>
+
+      showToast('The assistant has a layout suggestion for you.');
+
+      return;
+    }
+
+    render();
+
+    if (state.order[0] === id) {
+      showToast(`${LABELS[id]} is already at the top of your dashboard.`);
+    } else {
+      showToast(`Focus recorded for ${LABELS[id]}.`);
+    }
+  }
+
+  function acceptSuggestion() {
+
+    const id = state.currentPrompt;
+
+    if (!id) return;
+
+    state.accepted[id] += 1;
+
+    moveToTop(id, 'accepted');
+
+    if (state.accepted[id] >= 2) {
+      showToast(`Preference learned: ${LABELS[id]} can be automated next session.`);
+    }
+  }
+
+  function rejectSuggestion() {
+
+    const id = state.currentPrompt;
+
+    if (!id) return;
+
+    state.rejected[id] = true;
+    state.currentPrompt = null;
+
+    state.lastMessage =
+      `You kept the current layout. ${LABELS[id]} will not be suggested again in this session.`;
+
+    render();
+
+    showToast('Current layout kept. The suggestion is dismissed for this session.');
+  }
+
+  function undo() {
+
+    if (!state.lastChange) return;
+
+    const change = state.lastChange;
+
+    state.order = [...change.previous];
+
+    if (change.kind === 'accepted') {
+      state.accepted[change.id] =
+        Math.max(0, state.accepted[change.id] - 1);
+    }
+
+    if (change.kind === 'automatic' && state.accepted[change.id] >= 2) {
+      state.accepted[change.id] = 1;
+    }
+
+    state.lastChange = null;
+    state.currentPrompt = null;
+
+    state.lastMessage =
+      `Last layout change undone. ${LABELS[change.id]} will require confirmation again.`;
+
+    render();
+
+    showToast('Layout restored. Future changes will ask for confirmation again.');
+  }
+
+  $('nextSession').addEventListener('click', () => {
+
+    state.session += 1;
+
+    state.order = [...DEFAULT_ORDER];
+
+    state.focus = {
+      alerts: 0,
+      equipment: 0,
+      throughput: 0,
+      maintenance: 0
+    };
+
+    state.rejected = {
+      alerts: false,
+      equipment: false,
+      throughput: false,
+      maintenance: false
+    };
+
+    state.currentPrompt = null;
+    state.lastChange = null;
+
+    state.lastMessage =
+      `Session ${state.session} started. Learned preferences have been kept; the layout has returned to its default order for this demonstration.`;
+
+    render();
+
+    showToast(`Session ${state.session} started. Preference history retained.`);
+  });
+
+  $('undoButton').addEventListener('click', undo);
+  $('undoInline').addEventListener('click', undo);
+
+  $('acceptButton').addEventListener('click', acceptSuggestion);
+  $('rejectButton').addEventListener('click', rejectSuggestion);
+
+  $('autoToggle').addEventListener('change', event => {
+
+    state.autoEnabled = event.target.checked;
+
+    render();
+
+    showToast(
+      state.autoEnabled
+        ? 'Low-risk automatic changes enabled.'
+        : 'Automatic changes paused. Confirmation will be required.'
+    );
+  });
+
+  $('pauseInline').addEventListener('click', () => {
+
+    state.autoEnabled = false;
+
+    render();
+
+    showToast('Automatic changes paused.');
+  });
+
+  $('resetButton').addEventListener('click', () => {
+
+    state = freshState();
+
+    localStorage.removeItem(STORE_KEY);
+
+    render();
+
+    showToast('All learned preferences and layout changes were reset.');
+  });
+
+  cards.addEventListener('click', event => {
+
+    const button = event.target.closest('[data-focus]');
+
+    if (button) {
+      focusPanel(button.dataset.focus);
+    }
+  });
+
+  render();
+
+})();
+</script>
+
 </body>
 </html>
